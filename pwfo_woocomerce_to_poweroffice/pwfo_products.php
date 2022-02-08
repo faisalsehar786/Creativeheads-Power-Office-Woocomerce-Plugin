@@ -75,6 +75,136 @@ $finalDataCusWoo = json_encode($finalPro_arr, JSON_NUMERIC_CHECK);
 
 
 
+function get_products_from_power_office($url='',$token=''){
+
+$curl = curl_init();
+
+curl_setopt_array($curl, array(
+  CURLOPT_URL => $url,
+  CURLOPT_RETURNTRANSFER => true,
+  CURLOPT_ENCODING => '',
+  CURLOPT_MAXREDIRS => 10,
+  CURLOPT_TIMEOUT => 0,
+  CURLOPT_FOLLOWLOCATION => true,
+  CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+  CURLOPT_CUSTOMREQUEST => 'GET',
+
+  CURLOPT_HTTPHEADER => array(
+    'Authorization: Bearer '.$token,
+    'Content-Type: application/json'
+  ),
+));
+
+$response = curl_exec($curl);
+
+curl_close($curl);
+ $response;
+
+ $productObject = json_decode($response);
+	if (!empty($productObject) && $productObject->error!='invalid_client') {
+
+	
+			return  $productObject->data;
+	}else{
+		return false;
+	}
+
+}
+
+
+
+  
+
+function post_product_to_power_office_dashboard($url='', $status=true ,$token='',$dataObj=[] ,$method=''){
+
+	if ($status) {
+		
+
+
+	
+
+
+  
+	// ********************************************
+	// Post Products to PowerOffice API Starts Here
+	//*********************************************
+	$urlPro =$url;
+	$curlPro = curl_init($urlPro);
+	curl_setopt($curlPro, CURLOPT_URL, $urlPro);
+	curl_setopt($curlPro, CURLOPT_POST, true);
+	curl_setopt($curlPro, CURLOPT_RETURNTRANSFER, true);
+	$headersPro = array(
+		"Accept: application/json",
+		"Authorization: Bearer {$token}",
+		"Content-Type: application/json",
+	);
+	curl_setopt($curlPro, CURLOPT_HTTPHEADER, $headersPro);
+	
+	$finalPro_arr = [];
+
+
+	if ($method=='put') {
+			$powerOfficeData=get_products_from_power_office($url,$token);
+
+			
+      $IdFind='';
+   foreach ($powerOfficeData as $key => $val) {
+
+   	
+     if ($val->code==$dataObj->id) {
+          	
+        $IdFind=$val;
+       }
+
+
+  
+   }
+ 
+			
+			$dataPro = [
+			'id'=>(!empty($IdFind))? $IdFind->id:0,
+			'name' => $dataObj->name,
+			'description' => $dataObj->short_description,
+			'salesPrice' => $dataObj->price,
+			'code' => $dataObj->id,
+			'salesAccount' => 3000,
+			'isActive' => true
+];
+
+
+	}else{
+
+		$dataPro = [
+			'name' => $dataObj->name,
+			'description' => $dataObj->short_description,
+			'salesPrice' => $dataObj->price,
+			'code' => $dataObj->id,
+			'salesAccount' => 3000,
+			'isActive' => true
+];
+	}
+
+
+$finalPro_arr[] = $dataPro;  
+
+$finalDataCusWoo = json_encode($finalPro_arr, JSON_NUMERIC_CHECK);
+	
+	curl_setopt($curlPro, CURLOPT_POSTFIELDS, json_encode($finalPro_arr[0], JSON_NUMERIC_CHECK));
+	//for debug only!
+	curl_setopt($curlPro, CURLOPT_SSL_VERIFYHOST, false);
+	curl_setopt($curlPro, CURLOPT_SSL_VERIFYPEER, false);
+	$respPro = curl_exec($curlPro);
+	curl_close($curlPro);
+	return $respPro;
+}else{
+	return false;
+}
+
+}
+
+
+
+
 function postallProducts($url,$token,$Data){
 		
 	// ********************************************

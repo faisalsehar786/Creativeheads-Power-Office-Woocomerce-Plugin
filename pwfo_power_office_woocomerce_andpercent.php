@@ -12,10 +12,11 @@
 *
 *
 */
+// wp-admin/admin.php?page=power_office_woocomerce
 defined('ABSPATH') || die("You Can't Access this File Directly");
 define('POWER_OFFICE_PLUGIN_PATH', plugin_dir_path(__FILE__));
 define('POWER_OFFICE_PLUGIN_URL', plugin_dir_url(__FILE__));
-define('POWER_OFFICE_PLUGIN_FILE', __FILE__);
+define('POWER_OFFICE_PLUGIN_FILE', __FILE__);  
 
 define('POWER_OFFICE_PLUGIN_SITE_URL',get_site_url());
 define('POWER_OFFICE_PLUGIN_PO_API_URL',get_option('POWER_OFFICE_PLUGIN_PO_API_URL'));
@@ -45,6 +46,8 @@ function process_form_settings_pwfo(){
 		update_option('pwspk_woo_api_key', sanitize_text_field($_POST['pwspk_woo_api_key']));
 		update_option('pwspk_power_office_key', sanitize_text_field($_POST['pwspk_power_office_key']));
 update_option('POWER_OFFICE_PLUGIN_PO_API_URL', sanitize_text_field($_POST['POWER_OFFICE_PLUGIN_PO_API_URL']));
+update_option('Modedev', sanitize_text_field($_POST['Modedev']));
+
 	
 
 	
@@ -88,7 +91,17 @@ function options_func_pwfo(){ ?>
 		<br>
 		
 		
-		
+		<label for="">
+			
+			Setting On Sidebar:
+			
+			<select name="Modedev">
+				
+				<option value="on"<?php if (get_option('Modedev')=='on') { echo "Selected"; } ?>>Enable</option>
+				<option value="off" <?php if (get_option('Modedev')=='off') { echo "Selected"; } ?>>Disable</option>
+			</select>
+		</label>
+
 		
 		<?php submit_button('Save Credentials');
 		// echo  'Basic ' . base64_encode(get_option('pwspk_username').':'.get_option('pwspk_password'));
@@ -97,7 +110,10 @@ function options_func_pwfo(){ ?>
 	</form>
 
    <style type="text/css">
-   	#submit{
+ #adminmenu .toplevel_page_power_office_woocomerce{
+   	display: <?php if (get_option('Modedev')=='off') { echo "none"; } ?>;
+   }
+      	#submit{
 float: right;
     background: #11a111;
    	}
@@ -271,19 +287,20 @@ if ($tokenAccess!=false ) {
   
 
 
-
+ 
 
 register_activation_hook(__FILE__, function(){
 	
 add_option('pwspk_woo_api_key', '');
+add_option('Modedev', 'on');
 add_option('pwspk_power_office_key', '');
 add_option('POWER_OFFICE_PLUGIN_PO_API_URL', 'https://api-demo.poweroffice.net');
 
 });
 register_deactivation_hook(__FILE__, function(){
 	
-delete_option('pwspk_woo_api_key');
-	 delete_option('pwspk_power_office_key');
-  delete_option('POWER_OFFICE_PLUGIN_PO_API_URL');
+// delete_option('pwspk_woo_api_key');
+// 	 delete_option('pwspk_power_office_key');
+//   delete_option('POWER_OFFICE_PLUGIN_PO_API_URL');
 	
 });

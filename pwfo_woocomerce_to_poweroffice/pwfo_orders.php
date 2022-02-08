@@ -84,6 +84,167 @@ return $curlOrPost;
 }
 }
 
+
+
+
+function get_orders_from_power_office($url='',$token=''){
+
+$curl = curl_init();
+
+curl_setopt_array($curl, array(
+  CURLOPT_URL => $url,
+  CURLOPT_RETURNTRANSFER => true,
+  CURLOPT_ENCODING => '',
+  CURLOPT_MAXREDIRS => 10,
+  CURLOPT_TIMEOUT => 0,
+  CURLOPT_FOLLOWLOCATION => true,
+  CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+  CURLOPT_CUSTOMREQUEST => 'GET',
+
+  CURLOPT_HTTPHEADER => array(
+    'Authorization: Bearer '.$token,
+    'Content-Type: application/json'
+  ),
+));
+
+$response = curl_exec($curl);
+
+curl_close($curl);
+ $response;
+
+ $productObject = json_decode($response);
+	if (!empty($productObject) && $productObject->error!='invalid_client') {
+
+	
+			return  $productObject->data;
+	}else{
+		return false;
+	}
+
+}
+
+
+  
+
+function post_order_to_power_office_dashboard($url='', $status=true ,$token='',$dataObj=[] ,$method=''){
+
+
+	if ($status) {
+$urlOrPost =$url;
+$curlOrPost = curl_init($urlOrPost);
+curl_setopt($curlOrPost, CURLOPT_URL, $urlOrPost);
+curl_setopt($curlOrPost, CURLOPT_POST, true);
+curl_setopt($curlOrPost, CURLOPT_RETURNTRANSFER, true);
+$headersOrPost = array(
+"Accept: application/json",
+"Authorization: Bearer {$token}",
+"Content-Type: application/json",
+);
+curl_setopt($curlOrPost, CURLOPT_HTTPHEADER, $headersOrPost);
+$finalOr_arr = [];
+
+    if ($method=='put') {
+		
+
+
+
+		
+      $IdFind='';
+   foreach ($powerOfficeData as $key => $val) {
+
+   	
+     if ($val->invoiceNo==$dataObj->id) {
+          	
+        $IdFind=$val;
+       }
+      }
+
+
+
+$orgDate = $dataObj->date_created;
+$newDate = date("Y-m-d", strtotime($orgDate));
+$order_details = [
+'id'=>(!empty($IdFind))? $IdFind->id:0,
+'customerCode' => $dataObj->customer_id+10007,
+'voucherDate' => $newDate,
+'currencyCode' => "NOK",
+'currencyRate' => 1,
+'invoiceNo' => $dataObj->id
+];
+$lines_items = [];
+if (!empty($dataObj->line_items)) {
+foreach ($dataObj->line_items as $item) {
+$lines_items[] = [
+'amount' => floatval($item->subtotal),
+'productCode' => strval($item->product_id),
+'quantity' => $item->quantity,
+'accountCode' => 3000,
+'vatCode' => "3",
+'description' => $item->name
+];
+}
+}
+$order_details['lines'] = $lines_items;
+  
+   }else{
+
+$orgDate = $dataObj->date_created;
+$newDate = date("Y-m-d", strtotime($orgDate));
+$order_details = [
+'customerCode' => $dataObj->customer_id+10007,
+'voucherDate' => $newDate,
+'currencyCode' => "NOK",
+'currencyRate' => 1,
+'invoiceNo' => $dataObj->id
+];
+$lines_items = [];
+if (!empty($dataObj->line_items)) {
+foreach ($dataObj->line_items as $item) {
+$lines_items[] = [
+'amount' => floatval($item->subtotal),
+'productCode' => strval($item->product_id),
+'quantity' => $item->quantity,
+'accountCode' => 3000,
+'vatCode' => "3",
+'description' => $item->name
+];
+}
+}
+$order_details['lines'] = $lines_items;
+
+
+   }
+
+   	$powerOfficeData=get_orders_from_power_office($url,$token);
+    
+
+
+
+$finalOr_arr[] = $order_details;
+
+$finalDataOrWoo = json_encode($finalOr_arr);
+curl_setopt($curlOrPost, CURLOPT_POSTFIELDS, json_encode($finalOr_arr[0]));
+
+
+//for debug only!
+curl_setopt($curlOrPost, CURLOPT_SSL_VERIFYHOST, false);
+curl_setopt($curlOrPost, CURLOPT_SSL_VERIFYPEER, false);
+$respOrPost = curl_exec($curlOrPost);
+curl_close($curlOrPost);
+
+return $curlOrPost;
+}else{
+	return false;
+}
+
+
+	
+}
+
+
+
+
+
 function postallOrders($url,$token,$Data){
 $urlOrPost =$url;
 $curlOrPost = curl_init($urlOrPost);
