@@ -484,7 +484,7 @@ if( ! class_exists( 'mishaUpdateChecker' ) ) {
 			$res = new stdClass();
 
 			$res->name = $remote->name;
-			$res->slug =strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-',$remote->name))); 
+			//$res->slug =strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-',$remote->name))); 
 			$res->version = $remote->version;
 			$res->tested = $remote->version;
 			$res->requires =$remote->version;
@@ -522,8 +522,8 @@ if( ! class_exists( 'mishaUpdateChecker' ) ) {
 				// && version_compare( $remote->requires_php, PHP_VERSION, '<' )
 			) {
 				$res = new stdClass();
-				$res->slug = $this->plugin_slug;
-				$res->plugin = plugin_basename( __FILE__ ); // misha-update-plugin/misha-update-plugin.php
+				//$res->slug = $this->plugin_slug;
+				// $res->plugin = plugin_basename( __FILE__ ); // misha-update-plugin/misha-update-plugin.php
 				$res->new_version = $remote->version;
 				$res->tested = 5.8;
 				$res->package = CHFS_VALIDATE_API_URL.'/public/'.$remote->file;
