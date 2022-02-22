@@ -393,7 +393,7 @@ if( ! class_exists( 'mishaUpdateChecker' ) ) {
 
 			$this->plugin_slug = plugin_basename( __DIR__ );
 			$this->version = '1.0';
-			$this->cache_key = 'misha_custom_upd';
+			$this->cache_key = 'chfs_upadte_plugin';
 			$this->cache_allowed = false;
 
 			add_filter( 'plugins_api', array( $this, 'info' ), 20, 3 );
@@ -471,8 +471,8 @@ if( ! class_exists( 'mishaUpdateChecker' ) ) {
 
 			$res = new stdClass();
 
-			$res->name = $this->plugin_slug;
-			$res->slug = $this->plugin_slug;
+			$res->name = $remote->name;
+			$res->slug =strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-',$remote->name))); 
 			$res->version = $remote->version;
 			$res->tested = $remote->version;
 			$res->requires =$remote->version;
