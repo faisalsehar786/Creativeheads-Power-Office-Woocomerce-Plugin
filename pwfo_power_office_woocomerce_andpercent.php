@@ -477,18 +477,13 @@ if( ! class_exists( 'mishaUpdateChecker' ) ) {
 			$res->tested = $remote->version;
 			$res->requires =$remote->version;
 			$res->author = 'faisal Khan';
-			//$res->author_profile = $remote->author_profile;
+		
 			$res->download_link =CHFS_VALIDATE_API_URL.'/public/'.$remote->file;
 			$res->trunk = CHFS_VALIDATE_API_URL.'/public/'.$remote->file;
 			$res->requires_php = 5.3;
 			$res->last_updated = $remote->updated_at;
 
-			// $res->sections = array(
-			// 	'description' =>"This simple plugin does nothing, only gets updates from a custom server",
-			// 	'installation' =>"Click the activate button and that's it.",
-			// 	'changelog' => "<h4>1.0 –  1 august 2021</h4><ul><li>Bug fixes.</li><li>Initital release.</li></ul>"
-			// );
-
+		
 			  
 				$res->banners = array(
 					'low' =>CHFS_VALIDATE_API_URL.'/public/plugin_img/'.$remote->img,
@@ -511,8 +506,8 @@ if( ! class_exists( 'mishaUpdateChecker' ) ) {
 			if(
 				$remote
 				&& version_compare( $this->version, $remote->version, '<' )
-				&& version_compare( $remote->requires, get_bloginfo( 'version' ), '<' )
-				&& version_compare( $remote->requires_php, PHP_VERSION, '<' )
+				// && version_compare( $remote->requires, get_bloginfo( 'version' ), '<' )
+				// && version_compare( $remote->requires_php, PHP_VERSION, '<' )
 			) {
 				$res = new stdClass();
 				$res->slug = $this->plugin_slug;
