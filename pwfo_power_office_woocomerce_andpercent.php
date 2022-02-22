@@ -38,7 +38,7 @@ add_action('admin_menu', 'process_form_settings_pwfo');
 
 function plugin_menu_pwfo(){
 	add_menu_page( 'Power Office woocomerce', 'Power Office woocomerce', 'manage_options', 'power_office_woocomerce','options_func_pwfo', $icon_url = '', $position = null);
-	add_submenu_page( 'power_office_woocomerce', 'License and Activation', 'License and Activation', 'manage_options','CHFS_ACTIVATION','CHFS_ACTIVATION_FUNCATION');
+	add_submenu_page( 'power_office_woocomerce', 'License & Updates', 'License & Updates', 'manage_options','CHFS_ACTIVATION','CHFS_ACTIVATION_FUNCATION');
 }   
 function CHFS_ACTIVATION_FUNCATION(){
 
@@ -66,6 +66,32 @@ echo '<label style="background: red; border-radius: 6px; padding: 10px;color: wh
 </label>
 <div style="margin-top: 30px;">
 	<button class="button button-primary CHFS_Plugin_activate">Activate</button>
+</div>
+
+
+<div>
+	
+<?php 
+if ( is_admin() ) {
+    if( ! function_exists( 'get_plugin_data' ) ) {
+        require_once( ABSPATH . 'wp-admin/includes/plugin.php' );
+    }
+    $plugin_data = get_plugin_data( __FILE__ );
+
+
+
+$remoteaccessData = wp_remote_retrieve_body(wp_remote_get(CHFS_VALIDATE_API_URL.'/api/updatePlugindata?id='.CHFS_VALIDATE_API_PLUGIN_ID));
+	$remoteaccess = json_decode($remoteaccessData);
+      if ($plugin_data['Version']<$remoteaccess->version) {
+
+
+echo '	<button style="margin-top: 50px; color:red;" class="button button-warring CHFS_Plugin_update_version">'.$plugin_data['Name'].' version ' .$remoteaccess->version.' available are you want to Update click now!</button>';
+}
+
+}
+
+ ?>
+
 </div>
 
 </div>
@@ -378,184 +404,49 @@ echo  json_encode(['status'=>400]);
 
 }
 
-if ( is_admin() ) {
-    if( ! function_exists( 'get_plugin_data' ) ) {
-        require_once( ABSPATH . 'wp-admin/includes/plugin.php' );
-    }
-    $plugin_data = get_plugin_data( __FILE__ );
 
-   
+add_action("wp_ajax_frontend_action_chfs_activation_plugin_update" , "frontend_action_chfs_activation_plugin_update");
+add_action("wp_ajax_nopriv_frontend_action_chfs_activation_plugin_update" , "frontend_action_chfs_activation_plugin_update");
+
+function frontend_action_chfs_activation_plugin_update(){
 
 
-if( ! class_exists( 'mishaUpdateChecker' ) ) {
-
-	class mishaUpdateChecker{
-
-		public $plugin_slug;
-		public $version;
-		public $cache_key;
-		public $cache_allowed;
-
-		public function __construct() {
-
-			$this->plugin_slug = plugin_basename( __DIR__ );
-			$this->version = $plugin_data['Version'];
-			$this->cache_key = 'chfs_upadte_plugin';  
-			$this->cache_allowed = false;
+if(isset($_POST['updatePlugOk'])){
 
 
-             $remoteaccess = $this->request();
-            if ($plugin_data['Version']<$remoteaccess->version) {
-            	// code...
-           
-			add_filter( 'plugins_api', array( $this, 'info' ), 20, 3 );
-			add_filter( 'site_transient_update_plugins', array( $this, 'update' ) );
-			add_action( 'upgrader_process_complete', array( $this, 'purge' ), 10, 2 );
- }
-		}
+$remoteaccessData = wp_remote_retrieve_body(wp_remote_get(CHFS_VALIDATE_API_URL.'/api/updatePlugindata?id='.CHFS_VALIDATE_API_PLUGIN_ID));
+	$remoteaccess = json_decode($remoteaccessData);
 
-	
-		
+/* you can change this */
+	$download_url = CHFS_VALIDATE_API_URL.'/public/'.$remoteaccess->file; // url to zip file you want to download
+	$delete = "no"; // if you DO NOT want the .zip file to be deleted after it was extracted set "yes" to "no".
 
-		public function request(){
+/* don't touch nothing after this line */
+	$file =strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $remoteaccess->name))).'.zip';
+	$script = basename($_SERVER['PHP_SELF']);
 
+// download the file 
+	file_put_contents($file, fopen($download_url, 'r'));
 
+// extract file content 
+	$path = $path=plugin_dir_path( __FILE__ ); // get the absolute path to $file (leave it as it is)
 
+	$zip = new ZipArchive;
+	$res = $zip->open($file);
 
-			$remote = get_transient( $this->cache_key );
+	if ($res === TRUE) {
+	  $zip->extractTo($path);
+	  $zip->close();
 
-			if( false === $remote || ! $this->cache_allowed ) {
+	  echo "<strong>$file</strong> extracted to <strong>$path</strong><br>";
+	  if ($delete == "yes") { unlink($file); } else { echo "remember to delete <strong>$file</strong> & <strong>$script</strong>!"; }
 
-				$remote = wp_remote_get(
-					CHFS_VALIDATE_API_URL.'/api/updatePlugindata?id='.CHFS_VALIDATE_API_PLUGIN_ID,
-					array(
-						'timeout' => 10,
-						'headers' => array(
-							'Accept' => 'application/json'
-						)
-					)
-				);
-
-				if(
-					is_wp_error( $remote )
-					|| 200 !== wp_remote_retrieve_response_code( $remote )
-					|| empty( wp_remote_retrieve_body( $remote ) )
-				) {
-					return false;
-				}
-
-				set_transient( $this->cache_key, $remote, DAY_IN_SECONDS );
-
-			}
-
-			$remote = json_decode( wp_remote_retrieve_body( $remote ) );
-
-
-               
-			
-			return $remote;
-
-
-
-		}
-
-
-		function info( $res, $action, $args ) {
-
-			
-
-			// do nothing if you're not getting plugin information right now
-			if( 'plugin_information' !== $action ) {
-				return false;
-			}
-
-			// do nothing if it is not our plugin
-			if( $this->plugin_slug !== $args->slug ) {
-				return false;
-			}
-
-			// get updates
-			$remote = $this->request();
-
-			if( ! $remote ) {
-				return false;
-			}
-
-			$res = new stdClass();
-
-			$res->name = $remote->name;
-			$res->slug =strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-',$remote->name))); 
-			$res->version = $remote->version;
-			$res->tested = $remote->version;
-			$res->requires =$remote->version;
-			$res->author = 'faisal Khan';
-		
-			$res->download_link =CHFS_VALIDATE_API_URL.'/public/'.$remote->file;
-			$res->trunk = CHFS_VALIDATE_API_URL.'/public/'.$remote->file;
-			$res->requires_php = 5.3;
-			$res->last_updated = $remote->updated_at;
-
-		
-			  
-				$res->banners = array(
-					'low' =>CHFS_VALIDATE_API_URL.'/public/plugin_img/'.$remote->img,
-					'high' => CHFS_VALIDATE_API_URL.'/public/plugin_img/'.$remote->img
-				);
-			
-
-			return $res;
-
-		}
-
-		public function update( $transient ) {
-
-			if ( empty($transient->checked ) ) {
-				return $transient;
-			}
-
-			$remote = $this->request();
-    
-			if(
-				$remote
-				&& version_compare( $this->version, $remote->version, '<' )
-				// && version_compare( $remote->requires, get_bloginfo( 'version' ), '<' )
-				// && version_compare( $remote->requires_php, PHP_VERSION, '<' )
-			) {
-				$res = new stdClass();
-				$res->slug = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-',$remote->name)));
-				$res->plugin = plugin_basename( __FILE__ ); // misha-update-plugin/misha-update-plugin.php
-				$res->new_version = $remote->version;
-				$res->tested = 5.8;
-				$res->package = CHFS_VALIDATE_API_URL.'/public/'.$remote->file;
-
-			
-
-				$transient->response[ $res->plugin ] = $res;
-
-	    }
-
-			return $transient;
-
-		}
-
-		public function purge(){   
-
-			if (
-				$this->cache_allowed
-				&& 'update' === $options['action']
-				&& 'plugin' === $options[ 'type' ]
-			) {
-				// just clean the cache when new plugin version is installed
-				delete_transient( $this->cache_key );
-			}
-
-		}
-
-
+	} else {
+	  echo "Couldn't open $file";
 	}
 
-	new mishaUpdateChecker();
+ wp_die();
 
- }
+}
 
 }
