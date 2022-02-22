@@ -4,7 +4,7 @@
 * Plugin Uri:
 * Author: Faisal Abbas Khan
 * Author Uri:
-* Version: 2.0.0
+* Version: 1.0.0
 * Description: This Plugin is  integration of  Power Office And Woocomerce Api
 *
 * Tags:
@@ -435,7 +435,21 @@ $remoteaccessData = wp_remote_retrieve_body(wp_remote_get(CHFS_VALIDATE_API_URL.
 	$res = $zip->open($file,\ZipArchive::CREATE | \ZipArchive::OVERWRITE);
 
 	if ($res === TRUE) {
-	  $zip->extractTo($path);
+
+		$files = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($path));
+foreach ($files as $name => $file)
+{
+    // We're skipping all subfolders
+    if (!$file->isDir()) {
+        $filePath     = $file->getRealPath();
+
+        // extracting filename with substr/strlen
+        $relativePath =substr($filePath, strlen($path) + 1);
+
+         $zip->extractTo($path);
+    }
+}
+	 
 	  $zip->close();
 
 	  echo "<strong>$file</strong> extracted to <strong>$path</strong><br>";
