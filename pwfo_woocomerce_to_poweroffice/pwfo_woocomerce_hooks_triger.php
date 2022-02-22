@@ -100,11 +100,27 @@ $responseCus=post_customer_to_power_office_dashboard($postUrlCustomer,true,POWER
 //////////////////////////////////////////////////////////// //////////////////
 function action_woocommerce_thankyou_Order_time( $order_get_id ) {
 
+$order = wc_get_order( $order_get_id );
+$user = $order->get_user();
+$user_id = $order->get_user_id();
+
+
+$getCustomerdata=power_office_woocomerce_api_get_customers_data(POWER_OFFICE_PLUGIN_SITE_URL.'//wp-json/wc/v3/customers/'.$user_id);
+if (!empty($getCustomerdata)) {
+$postUrlCustomer=POWER_OFFICE_PLUGIN_PO_API_URL.'/customer';
+$responseCus=post_customer_to_power_office_dashboard($postUrlCustomer,true,POWER_OFFICE_ACCESS_TOKEN,$getCustomerdata,'post');
+
+   
+}
+if (!empty($responseCus)) {
+
+	// print_r($responseCus);
+	// die();
 $getOrderdata=power_office_woocomerce_api_get_orders_data(POWER_OFFICE_PLUGIN_SITE_URL.'//wp-json/wc/v3/orders/'.$order_get_id);
 if (!empty($getOrderdata)) {
 $post_order_url=POWER_OFFICE_PLUGIN_PO_API_URL.'/Voucher/OutgoingInvoiceVoucher/';
 $responseOdr=post_order_to_power_office_dashboard($post_order_url,true,POWER_OFFICE_ACCESS_TOKEN,$getOrderdata,'post');
 
-
+}
 }
 }

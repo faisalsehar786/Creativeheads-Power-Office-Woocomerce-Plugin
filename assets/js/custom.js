@@ -142,4 +142,33 @@ $('#success_message').html('');
 }
 }
 
+
+
+$(".CHFS_Plugin_activate" ).click(function() {
+
+
+let activation_key=$("#CHFS_VALIDATE_API_PLUGIN_KEY").val();
+	$.ajax({
+url:ajaxurl,
+method:"POST",
+datatype:'json',
+data:{action: 'frontend_action_chfs_activation_plugin',activation_key:activation_key},
+beforeSend:function()
+{
+
+},
+success:function(data)
+{
+
+location.reload();
+console.log(data)
+}
+})
+ 
+
+ });
+
+
+
+
 });

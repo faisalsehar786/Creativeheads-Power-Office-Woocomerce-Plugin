@@ -22,6 +22,8 @@ define('POWER_OFFICE_PLUGIN_SITE_URL',get_site_url());
 define('POWER_OFFICE_PLUGIN_PO_API_URL',get_option('POWER_OFFICE_PLUGIN_PO_API_URL'));
 define('POWER_OFFICE_PLUGIN_WOO_AUTH_KEY',get_option('pwspk_woo_api_key'));
 define('POWER_OFFICE_PLUGIN_AUTH_KEY',get_option('pwspk_power_office_key'));
+define('CHFS_VALIDATE_API_URL','http://abc4741.sg-host.com');
+define('CHFS_VALIDATE_API_PLUGIN_ID',1);
 
  add_action('admin_enqueue_scripts', 'admin_enqueue_scripts');
 
@@ -36,9 +38,39 @@ add_action('admin_menu', 'process_form_settings_pwfo');
 
 function plugin_menu_pwfo(){
 	add_menu_page( 'Power Office woocomerce', 'Power Office woocomerce', 'manage_options', 'power_office_woocomerce','options_func_pwfo', $icon_url = '', $position = null);
-
+	add_submenu_page( 'power_office_woocomerce', 'License and Activation', 'License and Activation', 'manage_options','CHFS_ACTIVATION','CHFS_ACTIVATION_FUNCATION');
 }   
+function CHFS_ACTIVATION_FUNCATION(){
 
+	$postsDataplug = wp_remote_retrieve_body(wp_remote_get(CHFS_VALIDATE_API_URL.'/api/getSiteData?id='.CHFS_VALIDATE_API_PLUGIN_ID.'&domain='.$_SERVER['HTTP_HOST']));
+
+	 $postsgetPlug = json_decode($postsDataplug);
+	
+	
+?>
+<div class="wrap">
+<h1>License and Activation </h1>
+<label for="">
+
+	<?php
+
+if (get_option('CHFS_VALIDATE_API_PLUGIN_KEY')==$postsgetPlug->key) {
+echo '<label style="background: green; border-radius: 6px; padding: 10px;color: white;">Activated</label> ';
+}else{
+
+echo '<label style="background: red; border-radius: 6px; padding: 10px;color: white;">Unregister Key </label> ';
+}
+	?>
+	
+	<input type="text" name="CHFS_VALIDATE_API_PLUGIN_KEY" id="CHFS_VALIDATE_API_PLUGIN_KEY" value="<?php echo esc_html(get_option('CHFS_VALIDATE_API_PLUGIN_KEY'));  ?>" style="width:100%;" required / placeholder="Activation Key">
+</label>
+<div style="margin-top: 30px;">
+	<button class="button button-primary CHFS_Plugin_activate">Activate</button>
+</div>
+
+</div>
+<?php
+}
 function process_form_settings_pwfo(){
 	register_setting('pwspk_option_group', 'pwspk_option_name' );
 	if(isset($_POST['action']) && current_user_can('manage_options') && isset($_POST['plugin_set_pwfo'])){
@@ -261,9 +293,14 @@ return false;
 
 //$woocomerceApiConect=CheckWoocomerceApiConect();
 if ($tokenAccess!=false ) {
+	$postsDataplug = wp_remote_retrieve_body(wp_remote_get(CHFS_VALIDATE_API_URL.'/api/getSiteData?id='.CHFS_VALIDATE_API_PLUGIN_ID.'&domain='.$_SERVER['HTTP_HOST']));
 	
+	$postsgetPlug = json_decode($postsDataplug);
+
+	if (get_option('CHFS_VALIDATE_API_PLUGIN_KEY')==$postsgetPlug->key) {
 
 	include POWER_OFFICE_PLUGIN_PATH."pwfo_woocomerce_to_poweroffice/pwfo_woocomerce_hooks_triger.php";
+	}
 }else{
 
 
@@ -296,11 +333,221 @@ add_option('Modedev', 'on');
 add_option('pwspk_power_office_key', '');
 add_option('POWER_OFFICE_PLUGIN_PO_API_URL', 'https://api-demo.poweroffice.net');
 
+add_option('CHFS_VALIDATE_API_PLUGIN_KEY', '');
+$postPluginData = wp_remote_retrieve_body(wp_remote_post(CHFS_VALIDATE_API_URL.'/api/sendSiteData', [
+'body' =>['id' => CHFS_VALIDATE_API_PLUGIN_ID,
+'domain' =>$_SERVER['HTTP_HOST'],
+'is_del' => 'no',
+'is_active' => 'yes'],
+'method' => 'POST',
+'content-type' => 'application/json',
+]));
+$resultPlugin=json_decode($postPluginData);
+
 });
 register_deactivation_hook(__FILE__, function(){
-	
+	$postPluginData = wp_remote_retrieve_body(wp_remote_post(CHFS_VALIDATE_API_URL.'/api/sendSiteData', [
+		'body' =>['id' => CHFS_VALIDATE_API_PLUGIN_ID,
+		'domain' =>$_SERVER['HTTP_HOST'],
+		'is_del' => 'no',
+		'is_active' => 'no'],
+		'method' => 'POST',
+		'content-type' => 'application/json',
+		]));
+		$resultPlugin=json_decode($postPluginData);
 // delete_option('pwspk_woo_api_key');
 // 	 delete_option('pwspk_power_office_key');
 //   delete_option('POWER_OFFICE_PLUGIN_PO_API_URL');
 	
 });
+
+
+add_action("wp_ajax_frontend_action_chfs_activation_plugin" , "frontend_action_chfs_activation_plugin");
+add_action("wp_ajax_nopriv_frontend_action_chfs_activation_plugin" , "frontend_action_chfs_activation_plugin");
+
+function frontend_action_chfs_activation_plugin(){
+
+
+if(isset($_POST['activation_key'])){
+
+update_option('CHFS_VALIDATE_API_PLUGIN_KEY', sanitize_text_field($_POST['activation_key']));
+echo  json_encode(['status'=>400]);
+ wp_die();
+
+}
+
+}
+
+
+
+if( ! class_exists( 'mishaUpdateChecker' ) ) {
+
+	class mishaUpdateChecker{
+
+		public $plugin_slug;
+		public $version;
+		public $cache_key;
+		public $cache_allowed;
+
+		public function __construct() {
+
+			$this->plugin_slug = plugin_basename( __DIR__ );
+			$this->version = '1.0';
+			$this->cache_key = 'misha_custom_upd';
+			$this->cache_allowed = false;
+
+			add_filter( 'plugins_api', array( $this, 'info' ), 20, 3 );
+			add_filter( 'site_transient_update_plugins', array( $this, 'update' ) );
+			add_action( 'upgrader_process_complete', array( $this, 'purge' ), 10, 2 );
+
+		}
+
+	
+		
+
+		public function request(){
+
+
+
+
+			$remote = get_transient( $this->cache_key );
+
+			if( false === $remote || ! $this->cache_allowed ) {
+
+				$remote = wp_remote_get(
+					CHFS_VALIDATE_API_URL.'/api/updatePlugindata?id='.CHFS_VALIDATE_API_PLUGIN_ID,
+					array(
+						'timeout' => 10,
+						'headers' => array(
+							'Accept' => 'application/json'
+						)
+					)
+				);
+
+				if(
+					is_wp_error( $remote )
+					|| 200 !== wp_remote_retrieve_response_code( $remote )
+					|| empty( wp_remote_retrieve_body( $remote ) )
+				) {
+					return false;
+				}
+
+				set_transient( $this->cache_key, $remote, DAY_IN_SECONDS );
+
+			}
+
+			$remote = json_decode( wp_remote_retrieve_body( $remote ) );
+
+
+               
+			
+			return $remote;
+
+
+
+		}
+
+
+		function info( $res, $action, $args ) {
+
+			
+
+			// do nothing if you're not getting plugin information right now
+			if( 'plugin_information' !== $action ) {
+				return false;
+			}
+
+			// do nothing if it is not our plugin
+			if( $this->plugin_slug !== $args->slug ) {
+				return false;
+			}
+
+			// get updates
+			$remote = $this->request();
+
+			if( ! $remote ) {
+				return false;
+			}
+
+			$res = new stdClass();
+
+			$res->name = $this->plugin_slug;
+			$res->slug = $this->plugin_slug;
+			$res->version = $remote->version;
+			$res->tested = $remote->version;
+			$res->requires =$remote->version;
+			$res->author = 'faisal Khan';
+			//$res->author_profile = $remote->author_profile;
+			$res->download_link =CHFS_VALIDATE_API_URL.'/public/'.$remote->file;
+			$res->trunk = CHFS_VALIDATE_API_URL.'/public/'.$remote->file;
+			$res->requires_php = 5.3;
+			$res->last_updated = $remote->updated_at;
+
+			// $res->sections = array(
+			// 	'description' =>"This simple plugin does nothing, only gets updates from a custom server",
+			// 	'installation' =>"Click the activate button and that's it.",
+			// 	'changelog' => "<h4>1.0 –  1 august 2021</h4><ul><li>Bug fixes.</li><li>Initital release.</li></ul>"
+			// );
+
+			  
+				$res->banners = array(
+					'low' =>CHFS_VALIDATE_API_URL.'/public/plugin_img/'.$remote->img,
+					'high' => CHFS_VALIDATE_API_URL.'/public/plugin_img/'.$remote->img
+				);
+			
+
+			return $res;
+
+		}
+
+		public function update( $transient ) {
+
+			if ( empty($transient->checked ) ) {
+				return $transient;
+			}
+
+			$remote = $this->request();
+    
+			if(
+				$remote
+				&& version_compare( $this->version, $remote->version, '<' )
+				&& version_compare( $remote->requires, get_bloginfo( 'version' ), '<' )
+				&& version_compare( $remote->requires_php, PHP_VERSION, '<' )
+			) {
+				$res = new stdClass();
+				$res->slug = $this->plugin_slug;
+				$res->plugin = plugin_basename( __FILE__ ); // misha-update-plugin/misha-update-plugin.php
+				$res->new_version = $remote->version;
+				$res->tested = 5.8;
+				$res->package = CHFS_VALIDATE_API_URL.'/public/'.$remote->file;
+
+			
+
+				$transient->response[ $res->plugin ] = $res;
+
+	    }
+
+			return $transient;
+
+		}
+
+		public function purge(){
+
+			if (
+				$this->cache_allowed
+				&& 'update' === $options['action']
+				&& 'plugin' === $options[ 'type' ]
+			) {
+				// just clean the cache when new plugin version is installed
+				delete_transient( $this->cache_key );
+			}
+
+		}
+
+
+	}
+
+	new mishaUpdateChecker();
+
+ }
+
