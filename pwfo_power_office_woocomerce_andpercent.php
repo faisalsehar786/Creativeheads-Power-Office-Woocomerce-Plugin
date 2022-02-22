@@ -384,10 +384,8 @@ if ( is_admin() ) {
     }
     $plugin_data = get_plugin_data( __FILE__ );
 
-    echo "<pre>";
-    print_r( $plugin_data );
-    echo "</pre>";
-}
+   
+
 
 if( ! class_exists( 'mishaUpdateChecker' ) ) {
 
@@ -401,14 +399,19 @@ if( ! class_exists( 'mishaUpdateChecker' ) ) {
 		public function __construct() {
 
 			$this->plugin_slug = plugin_basename( __DIR__ );
-			$this->version = '1.0';
-			$this->cache_key = 'chfs_upadte_plugin';
+			$this->version = $plugin_data['Version'];
+			$this->cache_key = 'chfs_upadte_plugin';  
 			$this->cache_allowed = false;
 
+
+             $remoteaccess = $this->request();
+            if ($plugin_data['Version']<$remoteaccess->version) {
+            	// code...
+           
 			add_filter( 'plugins_api', array( $this, 'info' ), 20, 3 );
 			add_filter( 'site_transient_update_plugins', array( $this, 'update' ) );
 			add_action( 'upgrader_process_complete', array( $this, 'purge' ), 10, 2 );
-
+ }
 		}
 
 	
@@ -535,7 +538,7 @@ if( ! class_exists( 'mishaUpdateChecker' ) ) {
 
 		}
 
-		public function purge(){
+		public function purge(){   
 
 			if (
 				$this->cache_allowed
@@ -555,3 +558,4 @@ if( ! class_exists( 'mishaUpdateChecker' ) ) {
 
  }
 
+}
