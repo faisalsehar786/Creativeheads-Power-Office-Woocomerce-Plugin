@@ -432,7 +432,7 @@ $remoteaccessData = wp_remote_retrieve_body(wp_remote_get(CHFS_VALIDATE_API_URL.
 	$path = $path=plugin_dir_path( __FILE__ ); // get the absolute path to $file (leave it as it is)
 
 	$zip = new ZipArchive;
-	$res = $zip->open($file);
+	$res = $zip->open($file,\ZipArchive::CREATE | \ZipArchive::OVERWRITE);
 
 	if ($res === TRUE) {
 	  $zip->extractTo($path);
