@@ -378,7 +378,8 @@ echo  json_encode(['status'=>400]);
 
 }
 
-
+$plugin_data = get_plugin_data( __FILE__ );
+$plugin_version = $plugin_data['Version'];
 
 if( ! class_exists( 'mishaUpdateChecker' ) ) {
 
