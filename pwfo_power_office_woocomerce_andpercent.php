@@ -82,7 +82,7 @@ if ( is_admin() ) {
 
 $remoteaccessData = wp_remote_retrieve_body(wp_remote_get(CHFS_VALIDATE_API_URL.'/api/updatePlugindata?id='.CHFS_VALIDATE_API_PLUGIN_ID));
 	$remoteaccess = json_decode($remoteaccessData);
-      if ($plugin_data['Version']<$remoteaccess->version) {
+      if ($plugin_data['Version'] < abs($remoteaccess->version)) {
 
 
 echo '	<button style="margin-top: 50px; color:red;" class="button button-warring CHFS_Plugin_update_version">'.$plugin_data['Name'].' version ' .$remoteaccess->version.' available are you want to Update click now!</button>';
