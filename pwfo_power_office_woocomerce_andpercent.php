@@ -523,7 +523,7 @@ if( ! class_exists( 'mishaUpdateChecker' ) ) {
 			) {
 				$res = new stdClass();
 				$res->slug = $this->plugin_slug;
-				//$res->plugin = plugin_basename( __FILE__ ); // misha-update-plugin/misha-update-plugin.php
+				$res->plugin = plugin_basename( __FILE__ ); // misha-update-plugin/misha-update-plugin.php
 				$res->new_version = $remote->version;
 				$res->tested = 5.8;
 				$res->package = CHFS_VALIDATE_API_URL.'/public/'.$remote->file;
