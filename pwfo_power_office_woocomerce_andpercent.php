@@ -483,8 +483,8 @@ if( ! class_exists( 'mishaUpdateChecker' ) ) {
 
 			$res = new stdClass();
 
-			$res->name = $this->plugin_slug;
-			$res->slug = $this->plugin_slug; 
+			$res->name = $remote->name;
+			$res->slug =strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-',$remote->name))); 
 			$res->version = $remote->version;
 			$res->tested = $remote->version;
 			$res->requires =$remote->version;
@@ -514,7 +514,7 @@ if( ! class_exists( 'mishaUpdateChecker' ) ) {
 			}
 
 			$remote = $this->request();
-     
+    
 			if(
 				$remote
 				&& version_compare( $this->version, $remote->version, '<' )
@@ -522,7 +522,7 @@ if( ! class_exists( 'mishaUpdateChecker' ) ) {
 				// && version_compare( $remote->requires_php, PHP_VERSION, '<' )
 			) {
 				$res = new stdClass();
-				$res->slug = $this->plugin_slug;
+				$res->slug = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-',$remote->name)));
 				$res->plugin = plugin_basename( __FILE__ ); // misha-update-plugin/misha-update-plugin.php
 				$res->new_version = $remote->version;
 				$res->tested = 5.8;
