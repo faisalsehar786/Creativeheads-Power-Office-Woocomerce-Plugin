@@ -378,8 +378,16 @@ echo  json_encode(['status'=>400]);
 
 }
 
-$plugin_data = get_plugin_data( __FILE__ );
-$plugin_version = $plugin_data['Version'];
+if ( is_admin() ) {
+    if( ! function_exists( 'get_plugin_data' ) ) {
+        require_once( ABSPATH . 'wp-admin/includes/plugin.php' );
+    }
+    $plugin_data = get_plugin_data( __FILE__ );
+
+    echo "<pre>";
+    print_r( $plugin_data );
+    echo "</pre>";
+}
 
 if( ! class_exists( 'mishaUpdateChecker' ) ) {
 
