@@ -173,7 +173,7 @@ float: right;
        <div class="progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" style="">
        </div>
       </div>
-       </div>
+       </div>  
  
    <h3>Step 1:</h3>
 	<button class="button button-primary sendAllproducts" id="sendAllproducts" >All Products</button>
