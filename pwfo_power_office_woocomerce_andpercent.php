@@ -61,7 +61,7 @@ function CHFS_ACTIVATION_FUNCATION(){
 
 	 $postsgetPlug = json_decode($postsDataplug);
 	
-	 E:\Wordpress\pwf\Creativeheads-Power-Office-Woocomerce-Plugin\assets\js\custom.js
+	
 ?>
 <div class="wrap">
 <h1>License and Activation </h1>
