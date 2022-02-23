@@ -4,7 +4,7 @@
 * Plugin Uri:
 * Author: Faisal Abbas Khan
 * Author Uri:
-* Version: 40.0.0
+* Version: 1.0.0
 * Description: This Plugin is  integration of  Power Office And Woocomerce Api
 *
 * Tags:
@@ -25,6 +25,25 @@ define('POWER_OFFICE_PLUGIN_AUTH_KEY',get_option('pwspk_power_office_key'));
 define('CHFS_VALIDATE_API_URL','http://abc4741.sg-host.com');
 define('CHFS_VALIDATE_API_PLUGIN_ID',1);
 
+
+
+require 'plugin-update-checker-master/plugin-update-checker.php';
+$myUpdateChecker = Puc_v4_Factory::buildUpdateChecker(
+	'https://github.com/faisalsehar786/Creativeheads-Power-Office-Woocomerce-Plugin/',
+	__FILE__,
+	'pwfo_power_office_woocomerce_andpercent'
+);
+
+//Set the branch that contains the stable release.
+$myUpdateChecker->setBranch('main');
+
+//Optional: If you're using a private repository, specify the access token like this:
+$myUpdateChecker->setAuthentication('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');
+
+
+
+
+
  add_action('admin_enqueue_scripts', 'admin_enqueue_scripts');
 
   function admin_enqueue_scripts(){
@@ -38,7 +57,7 @@ add_action('admin_menu', 'process_form_settings_pwfo');
 
 function plugin_menu_pwfo(){
 	add_menu_page( 'Power Office woocomerce', 'Power Office woocomerce', 'manage_options', 'power_office_woocomerce','options_func_pwfo', $icon_url = '', $position = null);
-	add_submenu_page( 'power_office_woocomerce', 'License & Updates', 'License & Updates', 'manage_options','CHFS_ACTIVATION','CHFS_ACTIVATION_FUNCATION');
+	add_submenu_page( 'power_office_woocomerce', 'License and Activation', 'License and Activation', 'manage_options','CHFS_ACTIVATION','CHFS_ACTIVATION_FUNCATION');
 }   
 function CHFS_ACTIVATION_FUNCATION(){
 
@@ -66,32 +85,6 @@ echo '<label style="background: red; border-radius: 6px; padding: 10px;color: wh
 </label>
 <div style="margin-top: 30px;">
 	<button class="button button-primary CHFS_Plugin_activate">Activate</button>
-</div>
-
-
-<div>
-	
-<?php 
-if ( is_admin() ) {
-    if( ! function_exists( 'get_plugin_data' ) ) {
-        require_once( ABSPATH . 'wp-admin/includes/plugin.php' );
-    }
-    $plugin_data = get_plugin_data( __FILE__ );
-
-
-
-$remoteaccessData = wp_remote_retrieve_body(wp_remote_get(CHFS_VALIDATE_API_URL.'/api/updatePlugindata?id='.CHFS_VALIDATE_API_PLUGIN_ID));
-	$remoteaccess = json_decode($remoteaccessData);
-      if ($plugin_data['Version'] < abs($remoteaccess->version)) {
-
-
-echo '	<button style="margin-top: 50px; color:red;" class="button button-warring CHFS_Plugin_update_version">'.$plugin_data['Name'].' version ' .$remoteaccess->version.' available are you want to Update click now!</button>';
-}
-
-}
-
- ?>
-
 </div>
 
 </div>
@@ -405,62 +398,4 @@ echo  json_encode(['status'=>400]);
 }
 
 
-add_action("wp_ajax_frontend_action_chfs_activation_plugin_update" , "frontend_action_chfs_activation_plugin_update");
-add_action("wp_ajax_nopriv_frontend_action_chfs_activation_plugin_update" , "frontend_action_chfs_activation_plugin_update");
 
-function frontend_action_chfs_activation_plugin_update(){
-
-
-if(isset($_POST['updatePlugOk'])){
-
-
-$remoteaccessData = wp_remote_retrieve_body(wp_remote_get(CHFS_VALIDATE_API_URL.'/api/updatePlugindata?id='.CHFS_VALIDATE_API_PLUGIN_ID));
-	$remoteaccess = json_decode($remoteaccessData);
-
-/* you can change this */
-	$download_url = CHFS_VALIDATE_API_URL.'/public/'.$remoteaccess->file; // url to zip file you want to download
-	$delete = "no"; // if you DO NOT want the .zip file to be deleted after it was extracted set "yes" to "no".
-
-/* don't touch nothing after this line */
-	$file =strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $remoteaccess->name))).'.zip';
-	$script = basename($_SERVER['PHP_SELF']);
-
-// download the file 
-	file_put_contents($file, fopen($download_url, 'r'));
-
-// extract file content 
-	$path = $path=plugin_dir_path( __FILE__ ); // get the absolute path to $file (leave it as it is)
-
-	$zip = new ZipArchive;
-	$res = $zip->open($file,\ZipArchive::CREATE | \ZipArchive::OVERWRITE);
-
-	if ($res === TRUE) {
-
-		$files = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($path));
-foreach ($files as $name => $file)
-{
-    // We're skipping all subfolders
-    if (!$file->isDir()) {
-        $filePath     = $file->getRealPath();
-
-        // extracting filename with substr/strlen
-        $relativePath =substr($filePath, strlen($path) + 1);
-
-         $zip->extractTo($path);
-    }
-}
-	 
-	  $zip->close();
-
-	  echo "<strong>$file</strong> extracted to <strong>$path</strong><br>";
-	  if ($delete == "yes") { unlink($file); } else { echo "remember to delete <strong>$file</strong> & <strong>$script</strong>!"; }
-
-	} else {
-	  echo "Couldn't open $file";
-	}
-
- wp_die();
-
-}
-
-}
