@@ -4,7 +4,7 @@
 * Plugin Uri:
 * Author: Faisal Abbas Khan
 * Author Uri:
-* Version: 6.0.0
+* Version: 7.0.0
 * Description: This Plugin is  integration of  Power Office And Woocomerce Api
 *
 * Tags:
