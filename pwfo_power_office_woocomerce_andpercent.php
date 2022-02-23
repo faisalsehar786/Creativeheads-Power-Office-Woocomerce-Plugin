@@ -17,7 +17,6 @@ defined('ABSPATH') || die("You Can't Access this File Directly");
 define('POWER_OFFICE_PLUGIN_PATH', plugin_dir_path(__FILE__));
 define('POWER_OFFICE_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('POWER_OFFICE_PLUGIN_FILE', __FILE__);  
-
 define('POWER_OFFICE_PLUGIN_SITE_URL',get_site_url());
 define('POWER_OFFICE_PLUGIN_PO_API_URL',get_option('POWER_OFFICE_PLUGIN_PO_API_URL'));
 define('POWER_OFFICE_PLUGIN_WOO_AUTH_KEY',get_option('pwspk_woo_api_key'));
@@ -136,7 +135,7 @@ function options_func_pwfo(){ ?>
 
 		
 		<?php submit_button('Save Credentials');
-		// echo  'Basic ' . base64_encode(get_option('pwspk_username').':'.get_option('pwspk_password'));
+		
 		?>
 		
 	</form>
@@ -291,7 +290,7 @@ return false;
   
 }
 
-//$woocomerceApiConect=CheckWoocomerceApiConect();
+
 if ($tokenAccess!=false ) {
 	$postsDataplug = wp_remote_retrieve_body(wp_remote_get(CHFS_VALIDATE_API_URL.'/api/getSiteData?id='.CHFS_VALIDATE_API_PLUGIN_ID.'&domain='.$_SERVER['HTTP_HOST']));
 	
@@ -304,14 +303,7 @@ if ($tokenAccess!=false ) {
 }else{
 
 
-	//include POWER_OFFICE_PLUGIN_PATH."pwfo_woocomerce_to_poweroffice/pwfo_woocomerce_hooks_triger.php";
 
-// 	echo '<div class="wrap" style="
-//     text-align: center;
-//     color: red;
-// "><div class="alert alert-danger">
-//   <strong>Poweroffice Auth key or woocomerce Api Key Is invalid !</strong> </a>.
-// </div></div>';
 
 }
 
@@ -355,9 +347,7 @@ register_deactivation_hook(__FILE__, function(){
 		'content-type' => 'application/json',
 		]));
 		$resultPlugin=json_decode($postPluginData);
-// delete_option('pwspk_woo_api_key');
-// 	 delete_option('pwspk_power_office_key');
-//   delete_option('POWER_OFFICE_PLUGIN_PO_API_URL');
+
 	
 });
 
@@ -379,6 +369,8 @@ echo  json_encode(['status'=>400]);
 }
 
 
+/////////////////////////////////  Update Control of plugin fro git hub //////////////////////////////
+if ( is_admin() ) {
 require 'plugin-update-checker-master/plugin-update-checker.php';
 $myUpdateChecker = Puc_v4_Factory::buildUpdateChecker(
 	'https://github.com/faisalsehar786/Creativeheads-Power-Office-Woocomerce-Plugin/',
@@ -391,3 +383,6 @@ $myUpdateChecker->setBranch('main');
 
 //Optional: If you're using a private repository, specify the access token like this:
 $myUpdateChecker->setAuthentication('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');
+
+
+}
