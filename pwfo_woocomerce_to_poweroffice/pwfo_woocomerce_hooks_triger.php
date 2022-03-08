@@ -22,7 +22,7 @@ $postProUrl=POWER_OFFICE_PLUGIN_PO_API_URL.'/product';
 $respons=post_product_to_power_office_dashboard($postProUrl,true,POWER_OFFICE_ACCESS_TOKEN,$returnDataProducts,'put');
 $check=json_decode($respons);
 }
-} 
+}
 }
 function productPublished_pwf($product_id){
 $user = wp_get_current_user();

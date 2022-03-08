@@ -2,7 +2,9 @@
 // *****************************************
 	// PowerOffice API Authorization Starts Here
 	//******************************************
+
 function power_office_woocomerce_api_get_products_data($url=''){
+
 $ch = curl_init();
 curl_setopt($ch, CURLOPT_URL, $url);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
@@ -25,6 +27,7 @@ return false;
 }
 	
 function post_product_to_power_office($url='', $status=true ,$token='',$dataObj=[]){
+
 	if ($status) {
 		
 		
@@ -67,40 +70,61 @@ $finalDataCusWoo = json_encode($finalPro_arr, JSON_NUMERIC_CHECK);
 }else{
 	return false;
 }
+
 }
+
+
+
 function get_products_from_power_office($url='',$token=''){
+
 $curl = curl_init();
+
 curl_setopt_array($curl, array(
-CURLOPT_URL => $url,
-CURLOPT_RETURNTRANSFER => true,
-CURLOPT_ENCODING => '',
-CURLOPT_MAXREDIRS => 10,
-CURLOPT_TIMEOUT => 0,
-CURLOPT_FOLLOWLOCATION => true,
-CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-CURLOPT_CUSTOMREQUEST => 'GET',
-CURLOPT_HTTPHEADER => array(
-'Authorization: Bearer '.$token,
-'Content-Type: application/json'
-),
+  CURLOPT_URL => $url,
+  CURLOPT_RETURNTRANSFER => true,
+  CURLOPT_ENCODING => '',
+  CURLOPT_MAXREDIRS => 10,
+  CURLOPT_TIMEOUT => 0,
+  CURLOPT_FOLLOWLOCATION => true,
+  CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+  CURLOPT_CUSTOMREQUEST => 'GET',
+
+  CURLOPT_HTTPHEADER => array(
+    'Authorization: Bearer '.$token,
+    'Content-Type: application/json'
+  ),
 ));
+
 $response = curl_exec($curl);
+
 curl_close($curl);
-$response;
-$productObject = json_decode($response);
+ $response;
+
+ $productObject = json_decode($response);
 	if (!empty($productObject) && $productObject->error!='invalid_client') {
+
 	
 			return  $productObject->data;
 	}else{
 		return false;
 	}
+
 }
 
+
+
+  
+
 function post_product_to_power_office_dashboard($url='', $status=true ,$token='',$dataObj=[] ,$method=''){
+
 	if ($status) {
 		
+
+
 	
 
+
+  
 	// ********************************************
 	// Post Products to PowerOffice API Starts Here
 	//*********************************************
@@ -117,19 +141,25 @@ function post_product_to_power_office_dashboard($url='', $status=true ,$token=''
 	curl_setopt($curlPro, CURLOPT_HTTPHEADER, $headersPro);
 	
 	$finalPro_arr = [];
+
+
 	if ($method=='put') {
 			$powerOfficeData=get_products_from_power_office($url,$token);
+
 			
-$IdFind='';
-foreach ($powerOfficeData as $key => $val) {
-	
-if ($val->code==$dataObj->id) {
-	
-$IdFind=$val;
-}
+      $IdFind='';
+   foreach ($powerOfficeData as $key => $val) {
 
-}
+   	
+     if ($val->code==$dataObj->id) {
+          	
+        $IdFind=$val;
+       }
 
+
+  
+   }
+ 
 			
 			$dataPro = [
 			'id'=>(!empty($IdFind))? $IdFind->id:0,
@@ -140,7 +170,10 @@ $IdFind=$val;
 			'salesAccount' => 3000,
 			'isActive' => true
 ];
+
+
 	}else{
+
 		$dataPro = [
 			'name' => $dataObj->name,
 			'description' => $dataObj->short_description,
@@ -150,7 +183,10 @@ $IdFind=$val;
 			'isActive' => true
 ];
 	}
-$finalPro_arr[] = $dataPro;
+
+
+$finalPro_arr[] = $dataPro;  
+
 $finalDataCusWoo = json_encode($finalPro_arr, JSON_NUMERIC_CHECK);
 	
 	curl_setopt($curlPro, CURLOPT_POSTFIELDS, json_encode($finalPro_arr[0], JSON_NUMERIC_CHECK));
@@ -163,7 +199,12 @@ $finalDataCusWoo = json_encode($finalPro_arr, JSON_NUMERIC_CHECK);
 }else{
 	return false;
 }
+
 }
+
+
+
+
 function postallProducts($url,$token,$Data){
 		
 	// ********************************************
@@ -179,7 +220,9 @@ function postallProducts($url,$token,$Data){
 		"Authorization: Bearer {$token}",
 		"Content-Type: application/json",
 	);
+
 	curl_setopt($curlPro, CURLOPT_HTTPHEADER, $headersPro);
+
 	curl_setopt($curlPro, CURLOPT_POSTFIELDS, json_encode($Data, JSON_NUMERIC_CHECK));
 	//for debug only!
 	curl_setopt($curlPro, CURLOPT_SSL_VERIFYHOST, false);
@@ -188,14 +231,18 @@ function postallProducts($url,$token,$Data){
 	
 	curl_close($curlPro);
 	
+    
+	return	$respPro;
 
-		return	$respPro;
 }
+  
 
 function post_product_to_power_office_all($url='', $status=true ,$token='',$dataObj=[]){
+
 	if ($status) {
 		
 	$retrunres='';
+
 	
 	
 	$finalPro_arr = [];
@@ -215,35 +262,49 @@ $finalDataCusWoo = json_encode($finalPro_arr, JSON_NUMERIC_CHECK);
 	$countTotal=0;
 	$countsuccess=0;
 	foreach ($finalPro_arr as $key => $value) {
-$countTotal++;
-$res=postallProducts($url,$token,$value);
-		$retrunres.="<pre>".print_r($res )."</pre>";
+
+   $countTotal++;
+     $res=postallProducts($url,$token,$value);
+
+	 	$retrunres.="<pre>".print_r($res )."</pre>";
 	}
-	
+
+  	
 return $retrunres;
+
 }else{
 	return false;
 }
-}
 
+}
+  
 add_action('wp_ajax_my_ajax_action_products', 'pwspk_ajax_action_products');
+
+
 function pwspk_ajax_action_products(){
 	if(isset($_POST['action']) && isset($_POST['sendAllproducts'])){
-		
+	 	
 		
 $returnDataProducts=power_office_woocomerce_api_get_products_data(POWER_OFFICE_PLUGIN_SITE_URL.'//wp-json/wc/v3/products');
 
-if (!empty($returnDataProducts)) {
+   
+ if (!empty($returnDataProducts)) {
+
 $postProUrl=POWER_OFFICE_PLUGIN_PO_API_URL.'/product';
 $respons=post_product_to_power_office_all($postProUrl,true,POWER_OFFICE_ACCESS_TOKEN,$returnDataProducts);
 $check=json_decode($respons);
+
+
 print_r($check);
 }
-	}else{
+
+	}else{ 
 echo "no";
+  
 
 	}
-
+  
 	
 	wp_die();
 }
+ 
