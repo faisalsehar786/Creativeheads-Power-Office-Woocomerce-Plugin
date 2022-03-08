@@ -11,7 +11,7 @@ add_action('woocommerce_update_product', 'edit_productPublished_pwf');
 add_action('woocommerce_new_product', 'productPublished_pwf');
 add_action( 'woocommerce_update_order', 'action_woocommerce_update_order', 10, 1 );
 add_action( 'woocommerce_new_order', 'action_woocommerce_new_order', 10, 1 );
-//////////////////////////////////////  Add Update Product //////////////////////////////////////////
+//////////////////////////////////////  Add Update Product //////////////////////////////////////////  
 function edit_productPublished_pwf($product_id){
 $user = wp_get_current_user();
 $allowed_roles = array('editor', 'administrator', 'author');
@@ -22,7 +22,7 @@ $postProUrl=POWER_OFFICE_PLUGIN_PO_API_URL.'/product';
 $respons=post_product_to_power_office_dashboard($postProUrl,true,POWER_OFFICE_ACCESS_TOKEN,$returnDataProducts,'put');
 $check=json_decode($respons);
 }
-}
+} 
 }
 function productPublished_pwf($product_id){
 $user = wp_get_current_user();
